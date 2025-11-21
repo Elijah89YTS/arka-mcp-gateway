@@ -1,8 +1,7 @@
 """
-Fetch Block Metadata tool for Notion MCP server.
+Get Page tool for Notion MCP server.
 
-Fetches metadata for a Notion block (including pages, which are special blocks)
-using its UUID. Returns block type, properties, and basic info but not child content.
+Retrieves metadata for a Notion page using its UUID.
 """
 from typing import Dict, Any
 from .client import NotionAPIClient
@@ -11,42 +10,41 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def get_page(block_id: str) -> Dict[str, Any]:
+async def get_page(page_id: str) -> Dict[str, Any]:
     """
-    Retrieve metadata for a Notion block.
+    Retrieve metadata for a Notion page.
 
-    Fetches metadata for a Notion block (including pages, which are special blocks)
-    using its UUID. Returns block type, properties, and basic info but not child content.
+    Fetches metadata for a Notion page using its UUID. Returns page properties,
+    parent info, timestamps, and other metadata but not child content.
 
     Prerequisites:
-    1) Block/page must be shared with your integration
-    2) Use valid block_id from API responses (not URLs)
+    1) Page must be shared with your integration
+    2) Use valid page_id from API responses (not URLs)
 
     For child blocks, use fetch_block_contents instead.
-    Common 404 errors mean the block isn't accessible to your integration.
+    Common 404 errors mean the page isn't accessible to your integration.
 
     Args:
-        block_id: The unique UUID identifier for the Notion block to be retrieved.
-                  Must be a valid 32-character UUID (with or without hyphens).
-                  Pages in Notion are also blocks, so page IDs work here too.
+        page_id: The unique UUID identifier for the Notion page to be retrieved.
+                 Must be a valid 32-character UUID (with or without hyphens).
 
     Returns:
-        Block object with metadata, type, and properties
+        Page object with metadata, properties, and timestamps
 
     Example:
-        block = await get_page("c02fc1d3-db8b-45c5-a222-27595b15aea7")
+        page = await get_page("c02fc1d3-db8b-45c5-a222-27595b15aea7")
     """
     try:
         client = NotionAPIClient()
 
-        # Use blocks endpoint as per Notion API spec
-        endpoint = f"/blocks/{block_id}"
+        # Use pages endpoint to retrieve page metadata
+        endpoint = f"/pages/{page_id}"
         response = await client.get(endpoint)
         return response
 
     except Exception as e:
-        logger.error(f"Failed to get block {block_id}: {e}")
+        logger.error(f"Failed to get page {page_id}: {e}")
         return {
-            "error": f"Failed to retrieve block: {str(e)}",
-            "block_id": block_id
+            "error": f"Failed to retrieve page: {str(e)}",
+            "page_id": page_id
         }
