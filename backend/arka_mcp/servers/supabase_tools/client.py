@@ -4,6 +4,7 @@ Supabase API Client Abstraction.
 Provides a thin wrapper over httpx for Supabase management API calls with automatic
 OAuth token retrieval from worker context.
 """
+
 import httpx
 import logging
 from typing import Dict, Any, Optional
@@ -20,6 +21,7 @@ class SupabaseAPIClient:
     - Request formatting
     - Error handling
     """
+
     BASE_URL = "https://api.supabase.com/v1"
     DEFAULT_TIMEOUT = 30.0
 
@@ -48,11 +50,7 @@ class SupabaseAPIClient:
         token_data = get_oauth_token("supabase-mcp")
         return token_data["access_token"]
 
-    async def get(
-        self,
-        endpoint: str,
-        params: Optional[Dict[str, Any]] = None
-    ) -> Any:
+    async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         """
         Make GET request to Supabase management API.
 
@@ -74,16 +72,16 @@ class SupabaseAPIClient:
                 url,
                 headers={"Authorization": f"Bearer {access_token}"},
                 params=params,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             response.raise_for_status()
             return response.json()
-    
+
     async def post(
         self,
         endpoint: str,
         json_data: Dict[str, Any],
-        params: Optional[Dict[str, Any]] = None
+        params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         """
         Make POST request to Supabase management API.
@@ -106,19 +104,17 @@ class SupabaseAPIClient:
                 url,
                 headers={
                     "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 json=json_data,
                 params=params,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             response.raise_for_status()
             return response.json()
 
     async def delete(
-        self,
-        endpoint: str,
-        params: Optional[Dict[str, Any]] = None
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
     ) -> Any:
         """
         Make DELETE request to Supabase management API.
@@ -140,7 +136,7 @@ class SupabaseAPIClient:
                 url,
                 headers={"Authorization": f"Bearer {access_token}"},
                 params=params,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             response.raise_for_status()
             return response.json()
@@ -149,7 +145,7 @@ class SupabaseAPIClient:
         self,
         endpoint: str,
         json_data: Dict[str, Any],
-        params: Optional[Dict[str, Any]] = None
+        params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         """
         Make PATCH request to Supabase management API.
@@ -172,11 +168,11 @@ class SupabaseAPIClient:
                 url,
                 headers={
                     "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 json=json_data,
                 params=params,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             response.raise_for_status()
             return response.json()
