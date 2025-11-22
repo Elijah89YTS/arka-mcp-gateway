@@ -2,12 +2,13 @@ from typing import Any, Dict, List, Optional
 
 from .run_sql_query import run_sql_query
 
+
 async def list_tables(
     ref: str,
     include_metadata: bool = True,
     include_system_schemas: bool = False,
     include_views: bool = True,
-    schemas: Optional[List[str]] = None
+    schemas: Optional[List[str]] = None,
 ) -> Any:
     """
     Lists all tables and views in specified database schemas.
@@ -69,17 +70,16 @@ async def list_tables(
     for row in rows:
         sch = row.get('table_schema')
         typ = row.get('table_type')
-        entry = schema_map.setdefault(sch, {
-            'schema_name': sch,
-            'tables': [],
-            'table_count': 0,
-            'view_count': 0
-        })
-        entry['tables'].append({
-            'table_name': row.get('table_name'),
-            'full_name': f"{sch}.{row.get('table_name')}",
-            'table_type': typ
-        })
+        entry = schema_map.setdefault(
+            sch, {'schema_name': sch, 'tables': [], 'table_count': 0, 'view_count': 0}
+        )
+        entry['tables'].append(
+            {
+                'table_name': row.get('table_name'),
+                'full_name': f"{sch}.{row.get('table_name')}",
+                'table_type': typ,
+            }
+        )
         if typ == 'BASE TABLE':
             entry['table_count'] += 1
             total_tables += 1
@@ -92,14 +92,14 @@ async def list_tables(
             'query_metadata': {
                 'include_metadata': include_metadata,
                 'include_views': include_views,
-                'errors': None
+                'errors': None,
             },
             'schemas': schemas_list,
             'tables': None,
             'total_schemas': len(schemas_list),
             'total_tables': total_tables,
-            'total_views': total_views
+            'total_views': total_views,
         },
         'error': None,
-        'successful': True
+        'successful': True,
     }
