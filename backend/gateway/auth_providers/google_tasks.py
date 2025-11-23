@@ -47,8 +47,8 @@ def create_google_tasks_oauth_provider(
     Returns:
         Configured GoogleTasksOAuthProvider instance
     """
-    if scopes is None:
-        # Default scopes - full Tasks access
+    # Use default full-access scope if none provided or empty
+    if not scopes:
         scopes = [
             "https://www.googleapis.com/auth/tasks",
         ]

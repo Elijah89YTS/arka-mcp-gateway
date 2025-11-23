@@ -1,6 +1,7 @@
 """
 OAuth Provider Registry - Factory for creating OAuth providers.
 """
+
 from typing import Dict, Optional
 from .base import OAuthProvider
 from .github import create_github_oauth_provider
@@ -57,9 +58,12 @@ class OAuthProviderRegistry:
                 self._providers["github-mcp"] = create_github_oauth_provider(
                     client_id=github_client_id,
                     client_secret=github_client_secret,
-                    redirect_uri=github_redirect_uri or f"{settings.backend_url}/servers/github-mcp/auth-callback"
+                    redirect_uri=github_redirect_uri
+                    or f"{settings.backend_url}/servers/github-mcp/auth-callback",
                 )
-                logger.info("GitHub OAuth provider initialized from environment variables")
+                logger.info(
+                    "GitHub OAuth provider initialized from environment variables"
+                )
             except Exception as e:
                 logger.error(f"Failed to initialize GitHub OAuth provider: {e}")
         else:
@@ -78,9 +82,12 @@ class OAuthProviderRegistry:
                 self._providers["gmail-mcp"] = create_gmail_oauth_provider(
                     client_id=gmail_client_id,
                     client_secret=gmail_client_secret,
-                    redirect_uri=gmail_redirect_uri or f"{settings.backend_url}/servers/gmail-mcp/auth-callback"
+                    redirect_uri=gmail_redirect_uri
+                    or f"{settings.backend_url}/servers/gmail-mcp/auth-callback",
                 )
-                logger.info("Gmail OAuth provider initialized from environment variables")
+                logger.info(
+                    "Gmail OAuth provider initialized from environment variables"
+                )
             except Exception as e:
                 logger.error(f"Failed to initialize Gmail OAuth provider: {e}")
         else:
@@ -99,9 +106,12 @@ class OAuthProviderRegistry:
                 self._providers["notion-mcp"] = create_notion_oauth_provider(
                     client_id=notion_client_id,
                     client_secret=notion_client_secret,
-                    redirect_uri=notion_redirect_uri or f"{settings.backend_url}/servers/notion-mcp/auth-callback"
+                    redirect_uri=notion_redirect_uri
+                    or f"{settings.backend_url}/servers/notion-mcp/auth-callback",
                 )
-                logger.info("Notion OAuth provider initialized from environment variables")
+                logger.info(
+                    "Notion OAuth provider initialized from environment variables"
+                )
             except Exception as e:
                 logger.error(f"Failed to initialize Notion OAuth provider: {e}")
         else:
@@ -118,9 +128,12 @@ class OAuthProviderRegistry:
                 self._providers["supabase-mcp"] = create_supabase_oauth_provider(
                     client_id=supa_client_id,
                     client_secret=supa_client_secret,
-                    redirect_uri=supa_redirect or f"{settings.backend_url}/servers/supabase-mcp/auth-callback"
+                    redirect_uri=supa_redirect
+                    or f"{settings.backend_url}/servers/supabase-mcp/auth-callback",
                 )
-                logger.info("Supabase OAuth provider initialized from environment variables")
+                logger.info(
+                    "Supabase OAuth provider initialized from environment variables"
+                )
             except Exception as e:
                 logger.error(f"Failed to initialize Supabase OAuth provider: {e}")
         else:
@@ -130,7 +143,9 @@ class OAuthProviderRegistry:
             )
         # Initialize Google Tasks provider from environment variables
         tasks_client_id = getattr(settings, 'google_tasks_oauth_client_id', None)
-        tasks_client_secret = getattr(settings, 'google_tasks_oauth_client_secret', None)
+        tasks_client_secret = getattr(
+            settings, 'google_tasks_oauth_client_secret', None
+        )
         tasks_redirect_uri = getattr(settings, 'google_tasks_oauth_redirect_uri', None)
 
         if tasks_client_id and tasks_client_secret:
@@ -138,9 +153,12 @@ class OAuthProviderRegistry:
                 self._providers["gtasks-mcp"] = create_google_tasks_oauth_provider(
                     client_id=tasks_client_id,
                     client_secret=tasks_client_secret,
-                    redirect_uri=tasks_redirect_uri or f"{settings.backend_url}/servers/gtasks-mcp/auth-callback"
+                    redirect_uri=tasks_redirect_uri
+                    or f"{settings.backend_url}/servers/gtasks-mcp/auth-callback",
                 )
-                logger.info("Google Tasks OAuth provider initialized from environment variables")
+                logger.info(
+                    "Google Tasks OAuth provider initialized from environment variables"
+                )
             except Exception as e:
                 logger.error(f"Failed to initialize Google Tasks OAuth provider: {e}")
         else:
@@ -220,7 +238,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials.get('scopes', [])
+                        scopes=credentials.get('scopes', []),
                     )
                     self._providers[server_id] = provider
                     return provider
@@ -230,7 +248,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials['scopes']
+                        scopes=credentials['scopes'],
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -240,7 +258,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials['scopes']
+                        scopes=credentials['scopes'],
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -250,7 +268,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials['scopes']
+                        scopes=credentials['scopes'],
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -260,7 +278,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials.get('scopes', [])
+                        scopes=credentials.get('scopes', []),
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -270,7 +288,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials['scopes']
+                        scopes=credentials['scopes'],
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -280,7 +298,7 @@ class OAuthProviderRegistry:
                         client_id=credentials['client_id'],
                         client_secret=credentials['client_secret'],  # Already decrypted
                         redirect_uri=credentials['redirect_uri'],
-                        scopes=credentials['scopes']
+                        scopes=credentials['scopes'],
                     )
                     # Cache the provider
                     self._providers[server_id] = provider
@@ -291,7 +309,9 @@ class OAuthProviderRegistry:
                     )
                     return None
         except Exception as e:
-            logger.error(f"Failed to load OAuth provider from database for {server_id}: {e}")
+            logger.error(
+                f"Failed to load OAuth provider from database for {server_id}: {e}"
+            )
 
         # No provider found
         logger.warning(f"No OAuth provider found for {server_id}")

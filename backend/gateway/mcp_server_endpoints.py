@@ -306,6 +306,13 @@ async def add_mcp_server(
                         "https://www.googleapis.com/auth/calendar.events",
                     ],
                 },
+                "gtasks-mcp": {
+                    "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
+                    "token_url": "https://oauth2.googleapis.com/token",
+                    "scopes": [
+                        "https://www.googleapis.com/auth/tasks",
+                    ],
+                },
                 "jira-mcp": {
                     "auth_url": "https://auth.atlassian.com/authorize",
                     "token_url": "https://auth.atlassian.com/oauth/token",
@@ -371,6 +378,7 @@ async def add_mcp_server(
                 "github-mcp": "github",
                 "gmail-mcp": "gmail",
                 "gcal-mcp": "google_calendar",
+                "gtasks-mcp": "google_tasks",
                 "jira-mcp": "jira",
                 "slack-mcp": "slack",
                 "gitlab-mcp": "gitlab",
