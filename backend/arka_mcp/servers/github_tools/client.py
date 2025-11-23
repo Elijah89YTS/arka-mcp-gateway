@@ -156,6 +156,45 @@ class GitHubAPIClient:
                 params=params,
                 timeout=self.timeout,
             )
+        response.raise_for_status()
+        return response.json()
+    
+    async def put(
+        self,
+        endpoint: str,
+        json_data: Dict[str, Any],
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """
+        Make PUT request to GitHub API.
+
+        Args:
+            endpoint: API endpoint (e.g., "/repos/{owner}/{repo}/pulls/{number}/merge").
+            json_data: Request body as dictionary.
+            params: Optional query parameters.
+
+        Returns:
+            Parsed JSON response.
+
+        Raises:
+            httpx.HTTPStatusError: If request fails.
+        """
+        access_token = self._get_access_token()
+        url = f"{self.BASE_URL}{endpoint}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Content-Type": "application/json",
+        }
+        async with httpx.AsyncClient() as http_client:
+            response = await http_client.put(
+                url,
+                headers=headers,
+                json=json_data,
+                params=params,
+                timeout=self.timeout,
+            )
             response.raise_for_status()
             return response.json()
 
