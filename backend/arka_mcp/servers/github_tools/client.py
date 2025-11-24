@@ -4,6 +4,7 @@ GitHub API Client Abstraction.
 Provides a thin wrapper over httpx for GitHub API calls with automatic
 OAuth token retrieval from worker context.
 """
+
 import httpx
 import logging
 from typing import Dict, Any, Optional
@@ -156,9 +157,9 @@ class GitHubAPIClient:
                 params=params,
                 timeout=self.timeout,
             )
-        response.raise_for_status()
-        return response.json()
-    
+            response.raise_for_status()
+            return response.json()
+
     async def put(
         self,
         endpoint: str,
@@ -198,7 +199,9 @@ class GitHubAPIClient:
             response.raise_for_status()
             return response.json()
 
-    async def delete(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    async def delete(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """
         Make DELETE request to GitHub API.
 

@@ -43,7 +43,7 @@ async def create_issue(
 
     client = GitHubAPIClient()
     endpoint = f"/repos/{owner}/{repo}/issues"
-    json_data: dict = {"title": title}
+    json_data = {"title": title}
     if body is not None:
         json_data["body"] = body
     if assignee is not None:
