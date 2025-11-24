@@ -10,6 +10,7 @@ This module provides endpoints for:
 
 import json
 import logging
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -514,48 +515,27 @@ async def update_mcp_server(
             oauth_creds = result.scalar_one_or_none()
 
             if oauth_creds:
-                # Track changes to client_id or client_secret (requires token invalidation)
+                # Update credentials - single pass through provided fields
                 for key, value in request.credentials.items():
                     # Skip if value is empty or None
                     if not value:
                         continue
 
-                    # Check if client_id changed
-                    if key == "client_id":
-                        old_value = getattr(oauth_creds, key, None)
-                        if old_value != value:
-                            credentials_changed = True
-
-                    # Check if client_secret changed (not the masked placeholder)
-                    if "secret" in key.lower() or "password" in key.lower():
-                        if value != "********":
-                            credentials_changed = True
-
-                # Update existing credentials
-                for key, value in request.credentials.items():
-                    # Skip if value is empty or None
-                    if not value:
-                        continue
-
-                    # Get current value for comparison
                     old_value = getattr(oauth_creds, key, None)
+                    is_sensitive = any(s in key.lower() for s in ["secret", "password", "token"])
 
-                    # Encrypt sensitive fields
-                    if "secret" in key.lower() or "password" in key.lower():
-                        # Skip if value is the masked placeholder
-                        # Frontend sends "********" when the secret hasn't been changed
-                        if value != "********":
-                            encrypted_value = encrypt_string(value)
-                            # Only mark as updated if value actually changed
-                            if old_value != encrypted_value:
-                                setattr(oauth_creds, key, encrypted_value)
-                                credentials_updated = True
+                    if is_sensitive:
+                        # Encrypt and store sensitive fields
+                        encrypted_value = encrypt_string(value)
+                        if old_value != encrypted_value:
+                            setattr(oauth_creds, key, encrypted_value)
+                            credentials_changed = True  # Triggers token invalidation
+                            oauth_creds.updated_at = datetime.utcnow()  # Track when secret was updated
                     else:
-                        # Update non-sensitive fields (like redirect_uri, client_id, etc.)
-                        # Only mark as updated if value actually changed
+                        # Update non-sensitive fields (client_id, redirect_uri, scopes, etc.)
                         if old_value != value:
                             setattr(oauth_creds, key, value)
-                            credentials_updated = True
+                            credentials_updated = True  # Triggers cache clear only
 
         # Log action
         await log_admin_action(
@@ -598,8 +578,8 @@ async def update_mcp_server(
             )
 
         # Always clear cached OAuth provider when ANY credentials are updated
-        # This ensures changes to redirect_uri, scopes, auth_url, etc. are reflected
-        if credentials_updated:
+        # This ensures changes to redirect_uri, scopes, auth_url, client_secret, etc. are reflected
+        if credentials_updated or credentials_changed:
             registry = get_oauth_provider_registry()
             registry.clear_provider_cache(server_id)
             logger.info(f"Cleared OAuth provider cache for {server_id} due to credential update")
@@ -742,13 +722,15 @@ async def get_mcp_server_credentials(
             # Return empty credentials if none exist yet
             return {
                 "client_id": "",
-                "client_secret": "",
+                "client_secret_hint": "",
+                "client_secret_configured": False,
+                "client_secret_updated_at": None,
                 "redirect_uri": f"{settings.backend_url}/servers/{server_id}/auth-callback",
                 "scopes": [],
                 "additional_config": {},
             }
 
-        # Return credentials (mask secrets)
+        # Return credentials with secret hint (not actual secret)
         try:
             client_id = (
                 decrypt_string(oauth_creds.client_id) if oauth_creds.client_id else ""
@@ -756,9 +738,23 @@ async def get_mcp_server_credentials(
         except:
             client_id = oauth_creds.client_id or ""
 
+        # Create secret hint: first 2 + last 2 characters
+        client_secret_hint = "••••"
+        if oauth_creds.client_secret:
+            try:
+                decrypted_secret = decrypt_string(oauth_creds.client_secret)
+                if len(decrypted_secret) > 4:
+                    client_secret_hint = f"{decrypted_secret[:2]}••••••{decrypted_secret[-2:]}"
+                elif len(decrypted_secret) > 0:
+                    client_secret_hint = "••••"
+            except:
+                client_secret_hint = "••••"
+
         return {
             "client_id": client_id,
-            "client_secret": "********",  # Mask for security
+            "client_secret_hint": client_secret_hint,
+            "client_secret_configured": bool(oauth_creds.client_secret),
+            "client_secret_updated_at": oauth_creds.updated_at.isoformat() if oauth_creds.updated_at else None,
             "redirect_uri": oauth_creds.redirect_uri
             or f"{settings.backend_url}/servers/{server_id}/auth-callback",
             "scopes": oauth_creds.scopes or [],
@@ -766,7 +762,7 @@ async def get_mcp_server_credentials(
                 k: (
                     v
                     if "secret" not in k.lower() and "password" not in k.lower()
-                    else "********"
+                    else "••••"  # Use bullet instead of asterisk for consistency
                 )
                 for k, v in (oauth_creds.additional_config or {}).items()
             },
@@ -779,7 +775,9 @@ async def get_mcp_server_credentials(
         # Return empty credentials on error for testing
         return {
             "client_id": "",
-            "client_secret": "",
+            "client_secret_hint": "",
+            "client_secret_configured": False,
+            "client_secret_updated_at": None,
             "redirect_uri": f"{settings.backend_url}/servers/{server_id}/auth-callback",
             "scopes": [],
             "additional_config": {},
