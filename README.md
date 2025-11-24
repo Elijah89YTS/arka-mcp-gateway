@@ -13,7 +13,7 @@ A centralized gateway for managing and connecting to multiple MCP (Model Context
 
 - 🔐 **GitHub OAuth** - User authentication with GitHub
 - 👤 **Admin Panel** - Create and manage users
-- 🎯 **MCP Server Management** - Configure GitHub, Gmail, Slack, and more
+- 🎯 **MCP Server Management** - Configure GitHub, Gmail, Google Tasks, Slack, and more
 - 🔑 **OAuth Provider Management** - Centralized OAuth credentials per server
 - 🛠️ **Tool Management** - Enable/disable tools organization-wide
 - 🔒 **Per-User Session Isolation** - Isolated user contexts per MCP server
@@ -183,6 +183,8 @@ curl -X POST http://localhost:8000/auth/admin/bootstrap
 
 ### Configuring MCP Server OAuth
 
+**Important:** All MCP server OAuth credentials must be configured via the Admin UI. Environment variables are not supported for MCP servers.
+
 After logging in as admin:
 
 1. Navigate to **Admin Dashboard** → **MCP Server Management**
@@ -191,6 +193,7 @@ After logging in as admin:
    - **GitHub MCP**: Requires GitHub OAuth App
    - **Gmail MCP**: Requires Google Cloud OAuth credentials
    - **Google Calendar MCP**: Requires Google Cloud OAuth credentials
+   - **Google Tasks MCP**: Requires Google Cloud OAuth credentials
    - **Slack MCP**: Requires Slack App credentials
 
 ### Adding New MCP Servers

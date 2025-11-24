@@ -11,11 +11,8 @@ from .slack import create_slack_oauth_provider
 from .notion import create_notion_oauth_provider
 from .google_tasks import create_google_tasks_oauth_provider
 from .supabase import create_supabase_oauth_provider
-from config import settings
-from database import get_db
 from gateway.oauth_db import get_oauth_credentials
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -24,150 +21,22 @@ class OAuthProviderRegistry:
     """
     Registry for OAuth providers.
 
-    Creates and caches OAuth provider instances based on server type.
+    Loads and caches OAuth provider instances from database configuration.
+    All MCP server OAuth credentials must be configured via the admin UI.
+    Environment variables are NOT supported for MCP server OAuth configuration.
     """
 
     def __init__(self):
-        """Initialize the OAuth provider registry"""
+        """
+        Initialize the OAuth provider registry.
+
+        Providers are loaded on-demand from the database when first requested.
+        """
         self._providers: Dict[str, OAuthProvider] = {}
-        self._initialize_providers()
-
-    def _initialize_providers(self):
-        """
-        Initialize OAuth providers from database or environment variables.
-
-        Precedence:
-        1. Check database for OAuth credentials (configured via admin UI)
-        2. Fall back to environment variables for backward compatibility
-
-        Expected environment variables (if not in database):
-        - GITHUB_OAUTH_CLIENT_ID
-        - GITHUB_OAUTH_CLIENT_SECRET
-        - GITHUB_OAUTH_REDIRECT_URI
-        """
-        # Note: This is synchronous initialization. For dynamic loading from database,
-        # use get_provider_async() method instead.
-
-        # Initialize GitHub provider from environment variables (backward compatibility)
-        github_client_id = getattr(settings, 'github_oauth_client_id', None)
-        github_client_secret = getattr(settings, 'github_oauth_client_secret', None)
-        github_redirect_uri = getattr(settings, 'github_oauth_redirect_uri', None)
-
-        if github_client_id and github_client_secret:
-            try:
-                self._providers["github-mcp"] = create_github_oauth_provider(
-                    client_id=github_client_id,
-                    client_secret=github_client_secret,
-                    redirect_uri=github_redirect_uri
-                    or f"{settings.backend_url}/servers/github-mcp/auth-callback",
-                )
-                logger.info(
-                    "GitHub OAuth provider initialized from environment variables"
-                )
-            except Exception as e:
-                logger.error(f"Failed to initialize GitHub OAuth provider: {e}")
-        else:
-            logger.info(
-                "GitHub OAuth credentials not found in environment. "
-                "Will check database when provider is requested."
-            )
-
-        # Initialize Gmail provider from environment variables (backward compatibility)
-        gmail_client_id = getattr(settings, 'gmail_oauth_client_id', None)
-        gmail_client_secret = getattr(settings, 'gmail_oauth_client_secret', None)
-        gmail_redirect_uri = getattr(settings, 'gmail_oauth_redirect_uri', None)
-
-        if gmail_client_id and gmail_client_secret:
-            try:
-                self._providers["gmail-mcp"] = create_gmail_oauth_provider(
-                    client_id=gmail_client_id,
-                    client_secret=gmail_client_secret,
-                    redirect_uri=gmail_redirect_uri
-                    or f"{settings.backend_url}/servers/gmail-mcp/auth-callback",
-                )
-                logger.info(
-                    "Gmail OAuth provider initialized from environment variables"
-                )
-            except Exception as e:
-                logger.error(f"Failed to initialize Gmail OAuth provider: {e}")
-        else:
-            logger.info(
-                "Gmail OAuth credentials not found in environment. "
-                "Will check database when provider is requested."
-            )
-
-        # Initialize Notion provider from environment variables (backward compatibility)
-        notion_client_id = getattr(settings, 'notion_oauth_client_id', None)
-        notion_client_secret = getattr(settings, 'notion_oauth_client_secret', None)
-        notion_redirect_uri = getattr(settings, 'notion_oauth_redirect_uri', None)
-
-        if notion_client_id and notion_client_secret:
-            try:
-                self._providers["notion-mcp"] = create_notion_oauth_provider(
-                    client_id=notion_client_id,
-                    client_secret=notion_client_secret,
-                    redirect_uri=notion_redirect_uri
-                    or f"{settings.backend_url}/servers/notion-mcp/auth-callback",
-                )
-                logger.info(
-                    "Notion OAuth provider initialized from environment variables"
-                )
-            except Exception as e:
-                logger.error(f"Failed to initialize Notion OAuth provider: {e}")
-        else:
-            logger.info(
-                "Notion OAuth credentials not found in environment. "
-                "Will check database when provider is requested."
-            )
-        # Initialize Supabase provider from environment variables
-        supa_client_id = getattr(settings, 'supabase_oauth_client_id', None)
-        supa_client_secret = getattr(settings, 'supabase_oauth_client_secret', None)
-        supa_redirect = getattr(settings, 'supabase_oauth_redirect_uri', None)
-        if supa_client_id and supa_client_secret:
-            try:
-                self._providers["supabase-mcp"] = create_supabase_oauth_provider(
-                    client_id=supa_client_id,
-                    client_secret=supa_client_secret,
-                    redirect_uri=supa_redirect
-                    or f"{settings.backend_url}/servers/supabase-mcp/auth-callback",
-                )
-                logger.info(
-                    "Supabase OAuth provider initialized from environment variables"
-                )
-            except Exception as e:
-                logger.error(f"Failed to initialize Supabase OAuth provider: {e}")
-        else:
-            logger.info(
-                "Supabase OAuth credentials not found in environment. "
-                "Will check database when provider is requested."
-            )
-        # Initialize Google Tasks provider from environment variables
-        tasks_client_id = getattr(settings, 'google_tasks_oauth_client_id', None)
-        tasks_client_secret = getattr(
-            settings, 'google_tasks_oauth_client_secret', None
+        logger.info(
+            "OAuth provider registry initialized. "
+            "Providers will be loaded from database on demand."
         )
-        tasks_redirect_uri = getattr(settings, 'google_tasks_oauth_redirect_uri', None)
-
-        if tasks_client_id and tasks_client_secret:
-            try:
-                self._providers["gtasks-mcp"] = create_google_tasks_oauth_provider(
-                    client_id=tasks_client_id,
-                    client_secret=tasks_client_secret,
-                    redirect_uri=tasks_redirect_uri
-                    or f"{settings.backend_url}/servers/gtasks-mcp/auth-callback",
-                )
-                logger.info(
-                    "Google Tasks OAuth provider initialized from environment variables"
-                )
-            except Exception as e:
-                logger.error(f"Failed to initialize Google Tasks OAuth provider: {e}")
-        else:
-            logger.info(
-                "Google Tasks OAuth credentials not found in environment. "
-                "Will check database when provider is requested."
-            )
-
-        # TODO: Initialize other providers when implemented (Jira, etc.)
 
     def get_provider(self, server_id: str) -> Optional[OAuthProvider]:
         """
@@ -209,10 +78,10 @@ class OAuthProviderRegistry:
 
     async def get_provider_async(self, server_id: str, db) -> Optional[OAuthProvider]:
         """
-        Get OAuth provider for a specific server, checking database first.
+        Get OAuth provider for a specific server from database.
 
-        This method checks the database for OAuth credentials before falling back
-        to the cached provider from environment variables.
+        Checks cache first for performance, then loads from database if not cached.
+        All MCP server OAuth credentials must be configured via admin UI.
 
         Args:
             server_id: MCP server ID (e.g., "github-mcp")

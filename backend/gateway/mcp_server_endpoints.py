@@ -10,6 +10,7 @@ This module provides endpoints for:
 
 import json
 import logging
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -323,43 +324,43 @@ async def add_mcp_server(
                     "token_url": "https://slack.com/api/oauth.v2.access",
                     "scopes": [
                         # Channel/Conversation permissions (PUBLIC)
-                        "channels:read",        # View basic information about public channels
-                        "channels:write",       # Manage public channels and create new ones
-                        "channels:history",     # View messages in public channels
+                        "channels:read",  # View basic information about public channels
+                        "channels:write",  # Manage public channels and create new ones
+                        "channels:history",  # View messages in public channels
                         # User permissions
-                        "users:read",           # View people in workspace
-                        "users:read.email",     # View email addresses
-                        "users.profile:read",   # View profile details
+                        "users:read",  # View people in workspace
+                        "users:read.email",  # View email addresses
+                        "users.profile:read",  # View profile details
                         "users.profile:write",  # Edit profile and status
                         # Group/Private channel permissions
-                        "groups:read",          # View basic info about private channels
-                        "groups:write",         # Manage private channels
-                        "groups:history",       # View messages in private channels
+                        "groups:read",  # View basic info about private channels
+                        "groups:write",  # Manage private channels
+                        "groups:history",  # View messages in private channels
                         # Direct message permissions
-                        "im:read",              # View basic info about DMs
-                        "im:write",             # Start DMs
-                        "im:history",           # View messages in DMs
+                        "im:read",  # View basic info about DMs
+                        "im:write",  # Start DMs
+                        "im:history",  # View messages in DMs
                         # Multi-party direct message permissions
-                        "mpim:read",            # View basic info about group DMs
-                        "mpim:write",           # Start group DMs
-                        "mpim:history",         # View messages in group DMs
+                        "mpim:read",  # View basic info about group DMs
+                        "mpim:write",  # Start group DMs
+                        "mpim:history",  # View messages in group DMs
                         # Chat/Message permissions
-                        "chat:write",           # Send messages
+                        "chat:write",  # Send messages
                         # File permissions
-                        "files:read",           # View files
-                        "files:write",          # Upload and edit files
+                        "files:read",  # View files
+                        "files:write",  # Upload and edit files
                         # Pin permissions
-                        "pins:read",            # View pinned content
-                        "pins:write",           # Add and remove pins
+                        "pins:read",  # View pinned content
+                        "pins:write",  # Add and remove pins
                         # Reaction permissions
-                        "reactions:read",       # View emoji reactions
-                        "reactions:write",      # Add and edit reactions
+                        "reactions:read",  # View emoji reactions
+                        "reactions:write",  # Add and edit reactions
                         # Other permissions
-                        "emoji:read",           # View custom emoji
-                        "search:read",          # Search workspace content
-                        "team:read",            # View workspace info
-                        "usergroups:read",      # View user groups
-                        "usergroups:write",     # Create and manage user groups
+                        "emoji:read",  # View custom emoji
+                        "search:read",  # Search workspace content
+                        "team:read",  # View workspace info
+                        "usergroups:read",  # View user groups
+                        "usergroups:write",  # Create and manage user groups
                     ],
                 },
                 "gitlab-mcp": {
@@ -427,7 +428,9 @@ async def add_mcp_server(
         if catalog_server["requires_auth"] and request.credentials:
             registry = get_oauth_provider_registry()
             registry.clear_provider_cache(request.server_id)
-            logger.info(f"Cleared OAuth provider cache for newly created server: {request.server_id}")
+            logger.info(
+                f"Cleared OAuth provider cache for newly created server: {request.server_id}"
+            )
 
         logger.info(f"Admin {user.get('sub')} added MCP server: {request.server_id}")
 
@@ -500,8 +503,9 @@ async def update_mcp_server(
         if request.is_enabled is not None:
             server.is_enabled = request.is_enabled
 
-        # Track if OAuth credentials are being changed
+        # Track if OAuth credentials are being changed (for user token invalidation)
         credentials_changed = False
+        credentials_updated = False
 
         # Update credentials if provided
         if request.credentials:
@@ -513,39 +517,31 @@ async def update_mcp_server(
             oauth_creds = result.scalar_one_or_none()
 
             if oauth_creds:
-                # Track changes to client_id or client_secret
+                # Update credentials - single pass through provided fields
                 for key, value in request.credentials.items():
                     # Skip if value is empty or None
                     if not value:
                         continue
 
-                    # Check if client_id changed
-                    if key == "client_id":
-                        old_value = getattr(oauth_creds, key, None)
-                        if old_value != value:
-                            credentials_changed = True
+                    old_value = getattr(oauth_creds, key, None)
+                    is_sensitive = any(
+                        s in key.lower() for s in ["secret", "password", "token"]
+                    )
 
-                    # Check if client_secret changed (not the masked placeholder)
-                    if "secret" in key.lower() or "password" in key.lower():
-                        if value != "********":
-                            credentials_changed = True
-
-                # Update existing credentials
-                for key, value in request.credentials.items():
-                    # Skip if value is empty or None
-                    if not value:
-                        continue
-
-                    # Encrypt sensitive fields
-                    if "secret" in key.lower() or "password" in key.lower():
-                        # Skip if value is the masked placeholder
-                        # Frontend sends "********" when the secret hasn't been changed
-                        if value != "********":
-                            encrypted_value = encrypt_string(value)
+                    if is_sensitive:
+                        # Encrypt and store sensitive fields
+                        encrypted_value = encrypt_string(value)
+                        if old_value != encrypted_value:
                             setattr(oauth_creds, key, encrypted_value)
+                            credentials_changed = True  # Triggers token invalidation
+                            oauth_creds.updated_at = (
+                                datetime.utcnow()
+                            )  # Track when secret was updated
                     else:
-                        # Update non-sensitive fields (like redirect_uri, client_id, etc.)
-                        setattr(oauth_creds, key, value)
+                        # Update non-sensitive fields (client_id, redirect_uri, scopes, etc.)
+                        if old_value != value:
+                            setattr(oauth_creds, key, value)
+                            credentials_updated = True  # Triggers cache clear only
 
         # Log action
         await log_admin_action(
@@ -559,7 +555,7 @@ async def update_mcp_server(
 
         await db.commit()
 
-        # If OAuth credentials changed, invalidate all user tokens and clear cache
+        # If OAuth credentials changed (client_id/client_secret), invalidate all user tokens
         invalidated_count = 0
         if credentials_changed:
             # Invalidate all user credentials for this server
@@ -567,7 +563,7 @@ async def update_mcp_server(
             result = await db.execute(
                 select(UserCredential).where(
                     UserCredential.server_id == server_id,
-                    UserCredential.is_authorized == True
+                    UserCredential.is_authorized == True,
                 )
             )
             user_creds = result.scalars().all()
@@ -582,20 +578,25 @@ async def update_mcp_server(
 
             await db.commit()
 
-            # Clear cached OAuth provider
-            registry = get_oauth_provider_registry()
-            registry.clear_provider_cache(server_id)
-
             logger.warning(
                 f"Invalidated {invalidated_count} user credentials for {server_id} "
                 f"due to OAuth credentials change (client_id/client_secret updated)"
+            )
+
+        # Always clear cached OAuth provider when ANY credentials are updated
+        # This ensures changes to redirect_uri, scopes, auth_url, client_secret, etc. are reflected
+        if credentials_updated or credentials_changed:
+            registry = get_oauth_provider_registry()
+            registry.clear_provider_cache(server_id)
+            logger.info(
+                f"Cleared OAuth provider cache for {server_id} due to credential update"
             )
 
         logger.info(f"Admin {user.get('sub')} updated MCP server: {server_id}")
 
         return {
             "message": "MCP server updated successfully",
-            "invalidated_users": invalidated_count
+            "invalidated_users": invalidated_count,
         }
 
     except HTTPException:
@@ -639,9 +640,7 @@ async def remove_mcp_server(
 
         # Delete all user credentials for this server
         user_creds_result = await db.execute(
-            select(UserCredential).where(
-                UserCredential.server_id == server_id
-            )
+            select(UserCredential).where(UserCredential.server_id == server_id)
         )
         user_creds = user_creds_result.scalars().all()
         deleted_user_creds_count = len(user_creds)
@@ -688,7 +687,7 @@ async def remove_mcp_server(
 
         return {
             "message": "MCP server removed successfully",
-            "deleted_user_credentials": deleted_user_creds_count
+            "deleted_user_credentials": deleted_user_creds_count,
         }
 
     except HTTPException:
@@ -729,13 +728,15 @@ async def get_mcp_server_credentials(
             # Return empty credentials if none exist yet
             return {
                 "client_id": "",
-                "client_secret": "",
+                "client_secret_hint": "",
+                "client_secret_configured": False,
+                "client_secret_updated_at": None,
                 "redirect_uri": f"{settings.backend_url}/servers/{server_id}/auth-callback",
                 "scopes": [],
                 "additional_config": {},
             }
 
-        # Return credentials (mask secrets)
+        # Return credentials with secret hint (not actual secret)
         try:
             client_id = (
                 decrypt_string(oauth_creds.client_id) if oauth_creds.client_id else ""
@@ -743,9 +744,27 @@ async def get_mcp_server_credentials(
         except:
             client_id = oauth_creds.client_id or ""
 
+        # Create secret hint: first 2 + last 2 characters
+        client_secret_hint = "****"
+        if oauth_creds.client_secret:
+            try:
+                decrypted_secret = decrypt_string(oauth_creds.client_secret)
+                if len(decrypted_secret) > 4:
+                    client_secret_hint = (
+                        f"{decrypted_secret[:2]}******{decrypted_secret[-2:]}"
+                    )
+                elif len(decrypted_secret) > 0:
+                    client_secret_hint = "****"
+            except:
+                client_secret_hint = "****"
+
         return {
             "client_id": client_id,
-            "client_secret": "********",  # Mask for security
+            "client_secret_hint": client_secret_hint,
+            "client_secret_configured": bool(oauth_creds.client_secret),
+            "client_secret_updated_at": (
+                oauth_creds.updated_at.isoformat() if oauth_creds.updated_at else None
+            ),
             "redirect_uri": oauth_creds.redirect_uri
             or f"{settings.backend_url}/servers/{server_id}/auth-callback",
             "scopes": oauth_creds.scopes or [],
@@ -753,7 +772,7 @@ async def get_mcp_server_credentials(
                 k: (
                     v
                     if "secret" not in k.lower() and "password" not in k.lower()
-                    else "********"
+                    else "••••"  # Use bullet instead of asterisk for consistency
                 )
                 for k, v in (oauth_creds.additional_config or {}).items()
             },
@@ -766,7 +785,9 @@ async def get_mcp_server_credentials(
         # Return empty credentials on error for testing
         return {
             "client_id": "",
-            "client_secret": "",
+            "client_secret_hint": "",
+            "client_secret_configured": False,
+            "client_secret_updated_at": None,
             "redirect_uri": f"{settings.backend_url}/servers/{server_id}/auth-callback",
             "scopes": [],
             "additional_config": {},
