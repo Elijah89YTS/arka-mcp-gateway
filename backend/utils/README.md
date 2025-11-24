@@ -87,10 +87,11 @@ docker-compose up backend
 
 # Check logs for successful provider initialization
 # Expected log messages:
-# - "Notion OAuth provider initialized from environment variables" (if env vars set)
-# - OR "Notion OAuth credentials not found in environment. Will check database when provider is requested."
+# - "OAuth provider registry initialized. Providers will be loaded from database on demand."
 # - No import errors
 # - Backend starts successfully on port 8000
+
+# Note: OAuth providers are loaded from database only (not environment variables)
 ```
 
 #### 2. Admin Configuration Test
