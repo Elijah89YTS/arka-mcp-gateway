@@ -202,8 +202,8 @@ async def create_token_context(
                     f"(expires_at: {cred.expires_at}), attempting refresh..."
                 )
 
-                # Google services (Gmail, Google Calendar, etc.) support token refresh
-                if cred.server_id in ["gmail-mcp", "gcal-mcp"]:
+                # Google services (Gmail, Google Calendar, Google Tasks, etc.) support token refresh
+                if cred.server_id in ["gmail-mcp", "gcal-mcp", "gtasks-mcp"]:
                     refresh_success = await refresh_google_token(cred, db)
                     if not refresh_success:
                         logger.warning(

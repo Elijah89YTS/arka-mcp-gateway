@@ -43,6 +43,7 @@ TOOL_DIRS = {
     "notion-mcp": "notion_tools",
     "gmail-mcp": "gmail_tools",
     "gcal-mcp": "gcal_tools",
+    "gtasks-mcp": "gtasks_tools",
     "slack-mcp": "slack_tools",
     "filesystem-mcp": "filesystem_tools",
     "supabase-mcp": "supabase_tools",
