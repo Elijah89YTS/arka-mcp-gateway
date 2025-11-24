@@ -500,8 +500,9 @@ async def update_mcp_server(
         if request.is_enabled is not None:
             server.is_enabled = request.is_enabled
 
-        # Track if OAuth credentials are being changed
+        # Track if OAuth credentials are being changed (for user token invalidation)
         credentials_changed = False
+        credentials_updated = False
 
         # Update credentials if provided
         if request.credentials:
@@ -513,7 +514,7 @@ async def update_mcp_server(
             oauth_creds = result.scalar_one_or_none()
 
             if oauth_creds:
-                # Track changes to client_id or client_secret
+                # Track changes to client_id or client_secret (requires token invalidation)
                 for key, value in request.credentials.items():
                     # Skip if value is empty or None
                     if not value:
@@ -536,16 +537,25 @@ async def update_mcp_server(
                     if not value:
                         continue
 
+                    # Get current value for comparison
+                    old_value = getattr(oauth_creds, key, None)
+
                     # Encrypt sensitive fields
                     if "secret" in key.lower() or "password" in key.lower():
                         # Skip if value is the masked placeholder
                         # Frontend sends "********" when the secret hasn't been changed
                         if value != "********":
                             encrypted_value = encrypt_string(value)
-                            setattr(oauth_creds, key, encrypted_value)
+                            # Only mark as updated if value actually changed
+                            if old_value != encrypted_value:
+                                setattr(oauth_creds, key, encrypted_value)
+                                credentials_updated = True
                     else:
                         # Update non-sensitive fields (like redirect_uri, client_id, etc.)
-                        setattr(oauth_creds, key, value)
+                        # Only mark as updated if value actually changed
+                        if old_value != value:
+                            setattr(oauth_creds, key, value)
+                            credentials_updated = True
 
         # Log action
         await log_admin_action(
@@ -559,7 +569,7 @@ async def update_mcp_server(
 
         await db.commit()
 
-        # If OAuth credentials changed, invalidate all user tokens and clear cache
+        # If OAuth credentials changed (client_id/client_secret), invalidate all user tokens
         invalidated_count = 0
         if credentials_changed:
             # Invalidate all user credentials for this server
@@ -582,14 +592,17 @@ async def update_mcp_server(
 
             await db.commit()
 
-            # Clear cached OAuth provider
-            registry = get_oauth_provider_registry()
-            registry.clear_provider_cache(server_id)
-
             logger.warning(
                 f"Invalidated {invalidated_count} user credentials for {server_id} "
                 f"due to OAuth credentials change (client_id/client_secret updated)"
             )
+
+        # Always clear cached OAuth provider when ANY credentials are updated
+        # This ensures changes to redirect_uri, scopes, auth_url, etc. are reflected
+        if credentials_updated:
+            registry = get_oauth_provider_registry()
+            registry.clear_provider_cache(server_id)
+            logger.info(f"Cleared OAuth provider cache for {server_id} due to credential update")
 
         logger.info(f"Admin {user.get('sub')} updated MCP server: {server_id}")
 

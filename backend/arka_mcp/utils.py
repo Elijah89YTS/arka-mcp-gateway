@@ -1,5 +1,8 @@
 import importlib
 import inspect
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def parse_tool_file(module_name: str, service: str, tool: str):
@@ -22,8 +25,31 @@ def parse_tool_file(module_name: str, service: str, tool: str):
 
     try:
         module = importlib.import_module(module_name)
+    except ModuleNotFoundError as e:
+        logger.warning(
+            f"Tool module not found: {module_name} "
+            f"(service={service}, tool={tool}). Error: {e}"
+        )
+        return None
+    except ImportError as e:
+        logger.error(
+            f"Failed to import tool module: {module_name} "
+            f"(service={service}, tool={tool}). Error: {e}"
+        )
+        return None
+    except Exception as e:
+        logger.error(
+            f"Unexpected error importing module: {module_name}. "
+            f"Error: {type(e).__name__}: {e}"
+        )
+        return None
+
+    try:
         func = getattr(module, tool)
-    except (ModuleNotFoundError, AttributeError):
+    except AttributeError as e:
+        logger.warning(
+            f"Tool function '{tool}' not found in module {module_name}. Error: {e}"
+        )
         return None
 
     # Signature string
