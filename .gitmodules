@@ -1,0 +1,6 @@
+[submodule "enterprise"]
+	path = enterprise
+	# IMPORTANT: Replace this URL with your actual private GitHub repository
+	# Example: git@github.com:kenislabs/arka-mcp-gateway-enterprise.git
+	# or: https://github.com/kenislabs/arka-mcp-gateway-enterprise.git
+	url = git@github.com:kenislabs/arka-mcp-gateway-enterprise.git

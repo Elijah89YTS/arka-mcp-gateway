@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '@/lib/api'
+import { isEnterprise } from '@/enterprise'
 
 function Login() {
   const [isAzureLoading, setIsAzureLoading] = useState(false)
@@ -133,30 +134,34 @@ function Login() {
 
         {/* Social Login */}
         <div className="space-y-3">
-          <Button
-            type="button"
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            onClick={handleAzureSignIn}
-            disabled={isAzureLoading}
-          >
-            {isAzureLoading ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Redirecting...
-              </>
-            ) : (
-              <>
-                <svg className="mr-2 size-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 0h10.93v10.93H0V0z" fill="#f25022"/>
-                  <path d="M12.07 0H23v10.93H12.07V0z" fill="#7fba00"/>
-                  <path d="M0 12.07h10.93V23H0V12.07z" fill="#00a4ef"/>
-                  <path d="M12.07 12.07H23V23H12.07V12.07z" fill="#ffb900"/>
-                </svg>
-                Sign in with Microsoft
-              </>
-            )}
-          </Button>
+          {/* Azure SSO - Enterprise Edition Only */}
+          {isEnterprise && (
+            <Button
+              type="button"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={handleAzureSignIn}
+              disabled={isAzureLoading}
+            >
+              {isAzureLoading ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Redirecting...
+                </>
+              ) : (
+                <>
+                  <svg className="mr-2 size-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h10.93v10.93H0V0z" fill="#f25022"/>
+                    <path d="M12.07 0H23v10.93H12.07V0z" fill="#7fba00"/>
+                    <path d="M0 12.07h10.93V23H0V12.07z" fill="#00a4ef"/>
+                    <path d="M12.07 12.07H23V23H12.07V12.07z" fill="#ffb900"/>
+                  </svg>
+                  Sign in with Microsoft
+                </>
+              )}
+            </Button>
+          )}
 
+          {/* GitHub OAuth - Available in All Editions */}
           <Button
             type="button"
             variant="outline"
