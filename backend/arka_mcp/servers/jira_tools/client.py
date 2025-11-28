@@ -89,7 +89,10 @@ class JiraAPIClient:
                 timeout=self.timeout,
             )
             response.raise_for_status()
-            return response.json()
+            # Some POST endpoints (e.g., transitions) return no content
+            if response.content:
+                return response.json()
+            return {}
     
     async def put(self, endpoint: str, json: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Any:
         """
