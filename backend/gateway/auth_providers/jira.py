@@ -148,6 +148,8 @@ def create_jira_oauth_provider(
             "manage:jira-webhook",
             "manage:jira-data-provider",
             "manage:jira-project",
+            # Include offline_access for refresh token capability
+            "offline_access",
         ]
     config = OAuthConfig(
         provider_name="jira",
