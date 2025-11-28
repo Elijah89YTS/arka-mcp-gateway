@@ -31,6 +31,8 @@ class JiraAPIClient:
     def __init__(self, timeout: float = DEFAULT_TIMEOUT):
         self.timeout = timeout
         self.cloud_id: str | None = None
+        # Base Atlassian instance URL (e.g., https://your-domain.atlassian.net)
+        self.instance_url: str | None = None
 
     async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         """
@@ -60,6 +62,67 @@ class JiraAPIClient:
             response.raise_for_status()
             return response.json()
     
+    async def post(self, endpoint: str, json: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Make POST request to Jira REST API.
+
+        Args:
+            endpoint: API endpoint path (e.g., "/issue")
+            json: Optional JSON body
+            params: Optional query parameters
+
+        Returns:
+            Parsed JSON response
+        """
+        token = get_oauth_token("jira-mcp")
+        access_token = token.get("access_token")
+        if not self.cloud_id:
+            await self._ensure_cloud_id(access_token)
+        base_url = self.BASE_URL_TEMPLATE.format(cloud_id=self.cloud_id)
+        url = f"{base_url}{endpoint}"
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=json,
+                params=params,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            return response.json()
+    
+    async def put(self, endpoint: str, json: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Make PUT request to Jira REST API.
+
+        Args:
+            endpoint: API endpoint path (e.g., "/issue/{id}")
+            json: Optional JSON body
+            params: Optional query parameters
+
+        Returns:
+            Parsed JSON response or empty dict
+        """
+        token = get_oauth_token("jira-mcp")
+        access_token = token.get("access_token")
+        if not self.cloud_id:
+            await self._ensure_cloud_id(access_token)
+        base_url = self.BASE_URL_TEMPLATE.format(cloud_id=self.cloud_id)
+        url = f"{base_url}{endpoint}"
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                url,
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=json,
+                params=params,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            # Some endpoints return no content
+            if response.content:
+                return response.json()
+            return {}
+    
     async def _ensure_cloud_id(self, access_token: str) -> None:
         """
         Discover Jira Cloud ID via accessible-resources endpoint.
@@ -77,6 +140,9 @@ class JiraAPIClient:
             if not resources or not isinstance(resources, list):
                 raise RuntimeError("No accessible Jira resources found for token")
             # Use the first accessible resource as cloud_id
-            self.cloud_id = resources[0].get("id")
-            if not self.cloud_id:
-                raise RuntimeError("Invalid resource data, missing cloud_id")
+            # Extract cloud_id and instance URL from accessible-resources
+            resource = resources[0]
+            self.cloud_id = resource.get("id")
+            self.instance_url = resource.get("url")
+            if not self.cloud_id or not self.instance_url:
+                raise RuntimeError("Invalid resource data, missing cloud_id or instance_url")

@@ -13,6 +13,10 @@ async def get_issue(
     """
     Retrieves a Jira issue by ID or key with optional query parameters.
 
+    Note:
+        This tool returns full issue details and serves as a fallback when no specialized tool applies.
+        For listing comments on an issue, use the `list_issue_comments` tool instead of embedding them here.
+
     Args:
         issue_id_or_key: The ID (e.g., "10000") or key (e.g., "PROJ-123") of the Jira issue.
         expand: Comma-separated list of entities to expand (e.g., 'changelog').
