@@ -37,13 +37,16 @@ api.interceptors.response.use(
     // Handle 402 Payment Required (Enterprise Edition features)
     if (error.response?.status === 402) {
       const errorMessage =
+        error.response?.data?.message ||
         error.response?.data?.detail ||
-        "This is an Enterprise Edition feature. Contact support@kenislabs.com or visit kenislabs.com.com for more information.";
+        "This is an Enterprise Edition feature. Contact support@kenislabs.com or visit kenislabs.com for more information.";
 
       // Create a custom error with enterprise feature information
       const enterpriseError = new Error(errorMessage);
       enterpriseError.isEnterpriseFeature = true;
       enterpriseError.status = 402;
+      enterpriseError.feature = error.response?.data?.feature;
+      enterpriseError.upgradeUrl = error.response?.data?.upgrade_url;
       enterpriseError.originalError = error;
 
       // You can also show a toast/notification here if you have a toast system

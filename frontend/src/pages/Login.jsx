@@ -5,10 +5,12 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '@/lib/api'
-import { isEnterprise } from '@/enterprise'
+// COMMENTED OUT FOR COMMUNITY EDITION - Uncomment when enterprise edition is enabled
+// import { isEnterprise } from '@/enterprise'
 
 function Login() {
-  const [isAzureLoading, setIsAzureLoading] = useState(false)
+  // COMMENTED OUT FOR COMMUNITY EDITION - Uncomment when enterprise edition is enabled
+  // const [isAzureLoading, setIsAzureLoading] = useState(false)
   const [isGithubLoading, setIsGithubLoading] = useState(false)
   const [isAdminLoading, setIsAdminLoading] = useState(false)
   const [adminEmail, setAdminEmail] = useState('')
@@ -16,12 +18,13 @@ function Login() {
   const [adminError, setAdminError] = useState('')
   const navigate = useNavigate()
 
-  const handleAzureSignIn = () => {
-    setIsAzureLoading(true)
-    // Redirect to backend Azure OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL || window.location.origin
-    window.location.href = `${backendUrl}/auth/login/azure`
-  }
+  // COMMENTED OUT FOR COMMUNITY EDITION - Uncomment when enterprise edition is enabled
+  // const handleAzureSignIn = () => {
+  //   setIsAzureLoading(true)
+  //   // Redirect to backend Azure OAuth endpoint
+  //   const backendUrl = import.meta.env.VITE_API_URL || window.location.origin
+  //   window.location.href = `${backendUrl}/auth/login/azure`
+  // }
 
   const handleGithubSignIn = () => {
     setIsGithubLoading(true)
@@ -135,7 +138,8 @@ function Login() {
         {/* Social Login */}
         <div className="space-y-3">
           {/* Azure SSO - Enterprise Edition Only */}
-          {isEnterprise && (
+          {/* COMMENTED OUT FOR COMMUNITY EDITION - Uncomment when enterprise edition is enabled */}
+          {/* {isEnterprise && (
             <Button
               type="button"
               className="w-full bg-blue-600 hover:bg-blue-700"
@@ -159,7 +163,7 @@ function Login() {
                 </>
               )}
             </Button>
-          )}
+          )} */}
 
           {/* GitHub OAuth - Available in All Editions */}
           <Button
