@@ -98,8 +98,8 @@ function AdminUsers() {
       console.error('Failed to fetch user tools:', error)
 
       // Check if this is an Enterprise Edition feature
-      if (error.isEnterpriseFeature || error.status === 402) {
-        toast.info(error.message || 'User-level tool permissions are only available in Enterprise Edition')
+      if (error.response?.status === 402) {
+        toast.info(error.response?.data?.message || 'User-level tool permissions are only available in Enterprise Edition')
       } else {
         toast.error('Failed to load user tool permissions')
       }
@@ -146,8 +146,8 @@ function AdminUsers() {
       console.error('Failed to toggle user tool:', error)
 
       // Check if this is an Enterprise Edition feature
-      if (error.isEnterpriseFeature || error.status === 402) {
-        toast.info(error.message || 'User-level tool permissions are only available in Enterprise Edition')
+      if (error.response?.status === 402) {
+        toast.info(error.response?.data?.message || 'User-level tool permissions are only available in Enterprise Edition')
       } else {
         toast.error('Failed to update user tool permission')
       }
@@ -180,8 +180,8 @@ function AdminUsers() {
       console.error('Failed to remove override:', error)
 
       // Check if this is an Enterprise Edition feature
-      if (error.isEnterpriseFeature || error.status === 402) {
-        toast.info(error.message || 'User-level tool permissions are only available in Enterprise Edition')
+      if (error.response?.status === 402) {
+        toast.info(error.response?.data?.message || 'User-level tool permissions are only available in Enterprise Edition')
       } else {
         toast.error('Failed to remove override')
       }

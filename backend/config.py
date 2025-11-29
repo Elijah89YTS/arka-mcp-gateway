@@ -18,6 +18,7 @@ Environment Variables:
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: Access token expiration in minutes (default: 30)
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: Refresh token expiration in days (default: 7)
 """
+
 from dynaconf import Dynaconf
 
 settings = Dynaconf(
