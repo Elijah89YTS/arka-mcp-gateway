@@ -17,12 +17,12 @@ function Login() {
   const navigate = useNavigate();
 
   // COMMENTED OUT FOR COMMUNITY EDITION - Uncomment when enterprise edition is enabled
-  // const handleAzureSignIn = () => {
-  //   setIsAzureLoading(true)
-  //   // Redirect to backend Azure OAuth endpoint
-  //   const backendUrl = import.meta.env.VITE_API_URL || window.location.origin
-  //   window.location.href = `${backendUrl}/auth/login/azure`
-  // }
+  const handleAzureSignIn = () => {
+    setIsAzureLoading(true);
+    // Redirect to backend Azure OAuth endpoint
+    const backendUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    window.location.href = `${backendUrl}/auth/login/azure`;
+  };
 
   const handleGithubSignIn = () => {
     setIsGithubLoading(true);
